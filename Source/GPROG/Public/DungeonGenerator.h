@@ -17,7 +17,7 @@ class GPROG_API ADungeonGenerator : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ADungeonGenerator();
-	
+	virtual void OnConstruction(const FTransform& Transform) override;
 	
 
 protected:
@@ -25,7 +25,8 @@ protected:
 	virtual void BeginPlay() override;
 
 
-
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<USceneComponent> Root;
 	
 	
 	UPROPERTY(EditAnywhere , Category = "Map Settings")
@@ -69,14 +70,22 @@ protected:
 	float Scale;
 
 	UPROPERTY(EditAnywhere , Category = "Editor Settings")
-	bool NewSeed = true;
+	bool NewSeed = false;
 	
 	UPROPERTY(EditAnywhere)
 	FRandomStream Stream;
 
+
+	UPROPERTY(EditAnywhere)
+	TArray<FIntVector> FloorTiles;
+	UPROPERTY(EditAnywhere)
+	TArray<FIntVector> CorridorTiles;
+
 	//Meshes
 	UPROPERTY(EditAnywhere,BlueprintReadWrite , Category = "Meshes ")
 	UInstancedStaticMeshComponent* FloorMesh;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite , Category = "Meshes ")
+	UInstancedStaticMeshComponent* WallMesh;
 
 	
 
@@ -88,7 +97,10 @@ private:
 	void SpawnTiles();
 	bool Room_FindNextLocation(FIntVector &NewLocation);
 	FIntVector TestRelativeTileLocation(FIntVector ReferenceLocation,int32 X,int32 Y, bool &thisISFloorTile);
-	TArray<FIntVector> FloorTiles;
+
+	TArray<FIntVector> Corridors_MapCorridors(FIntVector RoomA , FIntVector RoomB);
+	TArray<FIntVector> Corridors_MakeY(FIntVector From , FIntVector To);
+	TArray<FIntVector> Corridors_MakeX(FIntVector From , FIntVector To);
 	
 	FIntVector MaxExtents;
 	TMap<FIntVector,FIntVector> Rooms;
