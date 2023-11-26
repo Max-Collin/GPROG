@@ -18,7 +18,8 @@ public:
 	// Sets default values for this actor's properties
 	ADungeonGenerator();
 	virtual void OnConstruction(const FTransform& Transform) override;
-	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
 protected:
 	// Called when the game starts or when spawned
@@ -107,7 +108,11 @@ private:
 	FIntVector PreviousLocation = FIntVector(0,0,0);
 	
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
+
+	
+	FORCEINLINE TArray<FIntVector> GetFloorTiles() const {return FloorTiles;}
+	FORCEINLINE TArray<FIntVector> GetCorridorTiles() const {return CorridorTiles;}
+	FORCEINLINE FRandomStream GetStream() const {return Stream;}
+	FORCEINLINE float GetScale() const {return Scale;}
 };
