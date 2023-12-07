@@ -36,6 +36,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly)
 	TMap<TSubclassOf<AActor>,float> SpawnList;
+
+	//UPROPERTY(EditDefaultsOnly)
+	//TObjectPtr<>
 	
 
 private:

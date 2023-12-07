@@ -36,6 +36,7 @@ void ADungeonGenerator::OnConstruction(const FTransform& Transform)
 	WallMesh->ClearInstances();
 	FloorTiles.Empty();
 	CorridorTiles.Empty();
+	Rooms.Empty();
 	PreviousLocation = FIntVector(0,0,0);
 	Seed = FMath::Rand() % 999999999;
 	if(NewSeed)

@@ -104,7 +104,9 @@ private:
 	TArray<FIntVector> Corridors_MakeX(FIntVector From , FIntVector To);
 	
 	FIntVector MaxExtents;
+	UPROPERTY(VisibleAnywhere)
 	TMap<FIntVector,FIntVector> Rooms;
+	
 	FIntVector PreviousLocation = FIntVector(0,0,0);
 	
 public:	
