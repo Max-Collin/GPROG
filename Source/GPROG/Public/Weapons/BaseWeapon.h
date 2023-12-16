@@ -39,6 +39,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USphereComponent> SphereComponent;
 	
+	
 	/** Attaches the actor to a FirstPersonCharacter */
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void AttachWeapon(AGPROGCharacter* TargetCharacter);
@@ -46,7 +47,6 @@ public:
 	
 
 protected:
-
 	
 	
 	

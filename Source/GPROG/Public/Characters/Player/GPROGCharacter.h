@@ -47,6 +47,8 @@ public:
 
 	void AttachWeapon(ABaseWeapon* NewWeapon);
 
+	virtual void Hit() override;
+
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void Fire();
@@ -66,6 +68,8 @@ protected:
 	void Look(const FInputActionValue& Value);
 	
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+
+	FTimerHandle Timerhandle_Rifle;
 	
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UCameraComponent> CameraComponent;
@@ -81,6 +85,21 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<ABaseWeapon> EquipedWeapon;
+
+	/** Sound to play each time we fire */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
+	USoundBase* FireSound;
+	
+	/** AnimMontage to play each time we fire */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UAnimMontage* FireAnimation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float TimeBetweenShoots;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UParticleSystem* ImpactParticles;
+
 private:
 
 	bool HasWeapon;

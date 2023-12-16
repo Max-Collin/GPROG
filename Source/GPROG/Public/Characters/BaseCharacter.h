@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Interfaces/HitableActor.h"
 #include "BaseCharacter.generated.h"
 
 UCLASS()
-class GPROG_API ABaseCharacter : public ACharacter
+class GPROG_API ABaseCharacter : public ACharacter , public IHitableActor
 {
 	GENERATED_BODY()
 
@@ -25,5 +26,7 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual void Hit() override;
 
 };

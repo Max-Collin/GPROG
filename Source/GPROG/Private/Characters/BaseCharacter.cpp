@@ -32,3 +32,8 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 }
 
+void ABaseCharacter::Hit()
+{
+	IHitableActor::Hit();
+}
+

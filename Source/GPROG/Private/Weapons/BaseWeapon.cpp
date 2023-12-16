@@ -16,10 +16,12 @@ ABaseWeapon::ABaseWeapon()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	GunMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Gun Mesh"));
 	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("PickUp Sphere"));
-
+	
+	
+	SetRootComponent(SphereComponent);
+	GunMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Gun Mesh"));
+	GunMesh->SetupAttachment(GetRootComponent());
 }
 
 void ABaseWeapon::AttachWeapon(AGPROGCharacter* TargetCharacter)

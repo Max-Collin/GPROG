@@ -8,6 +8,8 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Weapons/BaseWeapon.h"
 
 
@@ -44,17 +46,48 @@ void AGPROGCharacter::AttachWeapon(ABaseWeapon* NewWeapon)
 	
 }
 
+void AGPROGCharacter::Hit()
+{
+	Super::Hit();
+}
+
 void AGPROGCharacter::Fire()
 {
+
+FHitResult HitResult;
+
+	const float WeaponRange = 20000.f;
+	const FVector StartTrace =GetCameraComponet()->GetComponentLocation();
+	const FVector EndTrace =(UKismetMathLibrary::GetForwardVector(GetCameraComponet()->GetComponentRotation())*WeaponRange)+StartTrace;
+
+	
+	//FCollisionQueryParams QueryParams = FCollisionQueryParams(SCENE_QUERY_STAT(WeaponTrace,false,this));
+	
+	bool bHitSomething = GetWorld()->LineTraceSingleByChannel(HitResult,StartTrace,EndTrace,ECC_Visibility);
+	if(bHitSomething)
+	{
+		if(ImpactParticles)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),ImpactParticles,FTransform(HitResult.ImpactNormal.Rotation(),HitResult.ImpactPoint));
+		}
+		UE_LOG(LogTemp,Warning,TEXT("hit %s"),*HitResult.GetActor()->GetName());
+	}
+	// Try and play the sound if specified
+	if (FireSound )
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+	}
 }
 
 void AGPROGCharacter::StartFire()
 {
-	UE_LOG(LogTemp,Warning,TEXT("fire"));
+	Fire();
+	GetWorldTimerManager().SetTimer(Timerhandle_Rifle,this,&AGPROGCharacter::Fire,TimeBetweenShoots,true);
 }
 
 void AGPROGCharacter::EndFire()
 {
+	GetWorldTimerManager().ClearTimer(Timerhandle_Rifle);
 }
 
 

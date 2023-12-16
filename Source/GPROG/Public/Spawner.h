@@ -25,16 +25,16 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	FVector offset;
 	
-	UPROPERTY(EditDefaultsOnly)
-	int32 Quantity;
+	UPROPERTY(EditAnywhere)
+	int32 Quantity=0;
 	
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	bool RoomOnly = true;
 	
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	TMap<TSubclassOf<AActor>,float> SpawnList;
 
 	//UPROPERTY(EditDefaultsOnly)
