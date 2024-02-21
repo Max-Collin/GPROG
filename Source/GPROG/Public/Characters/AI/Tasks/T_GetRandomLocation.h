@@ -13,7 +13,7 @@ UCLASS()
 class GPROG_API UT_GetRandomLocation : public UBTTask_BlackboardBase
 {
 	GENERATED_BODY()
-
+public:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 protected:

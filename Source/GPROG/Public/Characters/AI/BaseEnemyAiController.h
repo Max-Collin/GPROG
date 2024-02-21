@@ -4,7 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "Perception/AIPerceptionTypes.h"
 #include "BaseEnemyAiController.generated.h"
+
+
+class UAISenseConfig_Sight;
+class UAISenseConfig_Hearing;
+struct FAIStimulus;
 
 /**
  * 
@@ -21,7 +27,12 @@ class GPROG_API ABaseEnemyAiController : public AAIController
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UBlackboardData> BlackboardData;
 
+	TObjectPtr<class UAIPerceptionComponent> UaiPerceptionComponent;
+	
+	TObjectPtr<class UAISenseConfig_Sight> Sight;
+
 public:
+
 	
 void GetRandomLocation();
 
@@ -31,6 +42,8 @@ protected:
 	virtual void BeginPlay() override;
 	
 private:
+	UFUNCTION()
+	void OnTargetPerceptionUpdate(AActor* SeenActor,FAIStimulus Stimulus);
 	
 public:
 	FORCEINLINE UBlackboardComponent* GetBlackboardComponent() const {return  BlackboardComponent;}

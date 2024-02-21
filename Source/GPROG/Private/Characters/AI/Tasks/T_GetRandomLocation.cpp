@@ -10,7 +10,7 @@
 EBTNodeResult::Type UT_GetRandomLocation::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 
-ABaseEnemyAiController* EnemyAIController = Cast<ABaseEnemyAiController>( OwnerComp.GetOwner());
+	ABaseEnemyAiController* EnemyAIController = Cast<ABaseEnemyAiController>( OwnerComp.GetOwner());
 	ABaseEnemy* Enemy = Cast<ABaseEnemy>( EnemyAIController->GetPawn());
 	if(EnemyAIController&&Enemy)
 	{
@@ -21,7 +21,7 @@ ABaseEnemyAiController* EnemyAIController = Cast<ABaseEnemyAiController>( OwnerC
 		
 		FNavLocation NavLocation;
 		
-		if(NavigationSystem->GetRandomReachablePointInRadius(FVector(0.f,0.f,0.f),400.f,NavLocation))
+		if(NavigationSystem->GetRandomReachablePointInRadius(Enemy->GetActorLocation(),2000.f,NavLocation))
 		{
 			EnemyAIController->GetBlackboardComponent()->SetValueAsVector("RandomLocation",NavLocation.Location);
 			

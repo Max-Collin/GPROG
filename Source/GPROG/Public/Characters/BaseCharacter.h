@@ -20,6 +20,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	float MaxHealth=100;
+	float Health = 100;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

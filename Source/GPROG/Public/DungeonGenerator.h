@@ -7,6 +7,7 @@
 #include "DungeonGenerator.generated.h"
 
 
+class USpawner;
 class UInstancedStaticMeshComponent;
 
 UCLASS()
@@ -18,8 +19,11 @@ public:
 	// Sets default values for this actor's properties
 	ADungeonGenerator();
 	virtual void OnConstruction(const FTransform& Transform) override;
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+
+	void NewMap();
+;
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<USpawner> SpawnerComponent;
 
 protected:
 	// Called when the game starts or when spawned
@@ -28,7 +32,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USceneComponent> Root;
-	
+
+	UPROPERTY(EditAnywhere)
+	bool GenerateRoof = false;
 	
 	UPROPERTY(EditAnywhere , Category = "Map Settings")
 	int32 Seed;
@@ -76,7 +82,8 @@ protected:
 	UPROPERTY(EditAnywhere)
 	FRandomStream Stream;
 
-
+	UPROPERTY(EditAnywhere)
+	TArray<FIntVector> RoomOnlyTiles;
 	UPROPERTY(EditAnywhere)
 	TArray<FIntVector> FloorTiles;
 	UPROPERTY(EditAnywhere)
@@ -87,14 +94,17 @@ protected:
 	UInstancedStaticMeshComponent* FloorMesh;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite , Category = "Meshes ")
 	UInstancedStaticMeshComponent* WallMesh;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite , Category = "Meshes ")
+	UInstancedStaticMeshComponent* RoofMesh;
 
 	
 
 
 private:
-
+	
 	void GenerateMap();
 	void Room_GenerateFloor(FIntVector RootLocation );
+	void SpawnWalls(bool IsFloorTile, UE::Math::TIntVector3<int> FloorTile, FVector SpawnLocation);
 	void SpawnTiles();
 	bool Room_FindNextLocation(FIntVector &NewLocation);
 	FIntVector TestRelativeTileLocation(FIntVector ReferenceLocation,int32 X,int32 Y, bool &thisISFloorTile);
@@ -113,8 +123,9 @@ public:
 
 
 	
-	FORCEINLINE TArray<FIntVector> GetFloorTiles() const {return FloorTiles;}
+	FORCEINLINE TArray<FIntVector> GetFloorTiles() const {return RoomOnlyTiles;}
 	FORCEINLINE TArray<FIntVector> GetCorridorTiles() const {return CorridorTiles;}
 	FORCEINLINE FRandomStream GetStream() const {return Stream;}
+	FORCEINLINE TMap<FIntVector,FIntVector> GetRooms() const { return Rooms;}
 	FORCEINLINE float GetScale() const {return Scale;}
 };

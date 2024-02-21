@@ -8,8 +8,14 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Characters/enemies/BaseEnemy.h"
+#include "Components/SpotLightComponent.h"
+#include "Interfaces/PickUp_Interface.h"
+#include "Items/BaseItem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Singletons/GameSingleton.h"
+
 #include "Weapons/BaseWeapon.h"
 
 
@@ -21,9 +27,9 @@ AGPROGCharacter::AGPROGCharacter()
 	//SetRootComponent(SceneComponent);
 	
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	CameraComponent->SetupAttachment(GetRootComponent());
-	CameraComponent->SetRelativeLocation(FVector(-10.f, 0.f, 60.f)); // Position the camera
-    CameraComponent->bUsePawnControlRotation = true;
+	CameraComponent->SetupAttachment(GetRootComponent());// attaches camera to root component
+	CameraComponent->SetRelativeLocation(FVector(-10.f, 0.f, 60.f)); // Position of the camera
+    CameraComponent->bUsePawnControlRotation = true; // camera rotates with the player
 
 	GetMesh()->SetOwnerNoSee(true);
 
@@ -36,7 +42,9 @@ AGPROGCharacter::AGPROGCharacter()
 	Mesh1P->CastShadow = false;
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
-	
+	FlashLightComponent  =CreateDefaultSubobject<USpotLightComponent>(TEXT("FlashLight"));
+	FlashLightComponent->SetupAttachment(CameraComponent);
+	Tags.Add("Player");
 }
 
 void AGPROGCharacter::AttachWeapon(ABaseWeapon* NewWeapon)
@@ -46,9 +54,28 @@ void AGPROGCharacter::AttachWeapon(ABaseWeapon* NewWeapon)
 	
 }
 
+void AGPROGCharacter::SetOverlappingItem(ABaseItem* Item)
+{
+	IPickUp_Interface::SetOverlappingItem(Item);
+
+	OverlappingItem = Item;
+}
+
+void AGPROGCharacter::AddTreasure()
+{
+	IPickUp_Interface::AddTreasure();
+	
+}
+
 void AGPROGCharacter::Hit()
 {
 	Super::Hit();
+
+	Health= Health - 20;
+	if(Health<=0)
+	{
+		UE_LOG(LogTemp,Warning,TEXT("Player has perished"))
+	}
 }
 
 void AGPROGCharacter::Fire()
@@ -57,8 +84,8 @@ void AGPROGCharacter::Fire()
 FHitResult HitResult;
 
 	const float WeaponRange = 20000.f;
-	const FVector StartTrace =GetCameraComponet()->GetComponentLocation();
-	const FVector EndTrace =(UKismetMathLibrary::GetForwardVector(GetCameraComponet()->GetComponentRotation())*WeaponRange)+StartTrace;
+	const FVector StartTrace =GetCameraComponent()->GetComponentLocation();
+	const FVector EndTrace =(UKismetMathLibrary::GetForwardVector(GetCameraComponent()->GetComponentRotation())*WeaponRange)+StartTrace;
 
 	
 	//FCollisionQueryParams QueryParams = FCollisionQueryParams(SCENE_QUERY_STAT(WeaponTrace,false,this));
@@ -66,11 +93,16 @@ FHitResult HitResult;
 	bool bHitSomething = GetWorld()->LineTraceSingleByChannel(HitResult,StartTrace,EndTrace,ECC_Visibility);
 	if(bHitSomething)
 	{
+		//UE_LOG(LogTemp,Warning,TEXT("hit %s"),*HitResult.GetActor()->GetName());
 		if(ImpactParticles)
 		{
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),ImpactParticles,FTransform(HitResult.ImpactNormal.Rotation(),HitResult.ImpactPoint));
 		}
-		UE_LOG(LogTemp,Warning,TEXT("hit %s"),*HitResult.GetActor()->GetName());
+		if(IHitableActor* HitableActor = Cast<IHitableActor>(HitResult.GetActor()))
+		{
+			HitableActor->Hit();
+		}
+		
 	}
 	// Try and play the sound if specified
 	if (FireSound )
@@ -90,15 +122,34 @@ void AGPROGCharacter::EndFire()
 	GetWorldTimerManager().ClearTimer(Timerhandle_Rifle);
 }
 
+float AGPROGCharacter::GetMaxHealth()
+{
+	return MaxHealth;
+}
+
+float AGPROGCharacter::GetHealth()
+{
+	return Health;
+}
+
+void AGPROGCharacter::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+                                      UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	  
+
+
+	
+}
+
 
 void AGPROGCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	if(DefaultWeapon)
 	{
-		EquipedWeapon = GetWorld()->SpawnActor<ABaseWeapon>(DefaultWeapon);
+		EquippedWeapon = GetWorld()->SpawnActor<ABaseWeapon>(DefaultWeapon);
 		FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-		EquipedWeapon->AttachToComponent(Mesh1P, AttachmentRules, FName(TEXT("GripPoint")));
+		EquippedWeapon->AttachToComponent(Mesh1P, AttachmentRules, FName(TEXT("GripPoint")));
 		
 	}
 	
@@ -111,8 +162,21 @@ void AGPROGCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	if(UGameSingleton* GameSingleton = UGameSingleton::GetInstance())
+	{
+		GameSingleton->ResetScore();
+	}
 }
 
+void AGPROGCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	if(UGameSingleton* GameSingleton = UGameSingleton::GetInstance())
+	{
+		GameSingleton->StoreScore();
+	}
+}
 
 void AGPROGCharacter::Move(const FInputActionValue& Value)
 {
@@ -155,9 +219,20 @@ void AGPROGCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGPROGCharacter::Look);
-
+		//fire
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AGPROGCharacter::StartFire);
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AGPROGCharacter::EndFire);
+		//flashlight
+		EnhancedInputComponent->BindAction(FlashlightAction, ETriggerEvent::Started, this, &AGPROGCharacter::ToggleFlashlight);
 	}
+}
+
+void AGPROGCharacter::ToggleFlashlight()
+{
+	UE_LOG(LogTemp,Warning,TEXT("Flashlight"))
+	FlashLightComponent->ToggleVisibility();
+	
+	
+	
 }
 

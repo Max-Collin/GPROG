@@ -19,7 +19,7 @@ public:
 	USpawner();
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	void NewLevel();
 	
 protected:
 	// Called when the game starts
@@ -37,6 +37,10 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TMap<TSubclassOf<AActor>,float> SpawnList;
 
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> EndDoor;
+	
 	//UPROPERTY(EditDefaultsOnly)
 	//TObjectPtr<>
 	
@@ -44,6 +48,7 @@ protected:
 private:
 	void Spawn();
 	void SpawnItems();
+	void SpawnEndDoor();
 
 	float Scale;
 	FRandomStream Stream;
@@ -52,6 +57,7 @@ private:
 	TArray<FIntVector> SpawnLocationTiles;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<ADungeonGenerator> DungeonGenerator;
+	
 	
 
 public:	

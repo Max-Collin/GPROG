@@ -17,5 +17,10 @@ class GPROG_API ABaseEnemy : public ABaseCharacter
 
 public:
 	virtual void Hit() override;
+
+protected:
+
+private:
+	
 	
 };
